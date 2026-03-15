@@ -9,12 +9,12 @@ export type IndividualRegistrationRequest = components["schemas"]["IndividualReg
 export const authService = {
     login: async (credentials: LoginRequest): Promise<AuthResponse> => {
         // Note: Use the path exactly as defined in your generated 'paths'
-        const response = await apiClient.post("/api/auth/login", credentials);
+        const response = await apiClient.post("/auth/login", credentials);
         return response.data;
     },
 
     registerIndividual: async (data: IndividualRegistrationRequest): Promise<string> => {
-        const response = await apiClient.post("/api/auth/register/individual", data);
+        const response = await apiClient.post("/auth/register/individual", data);
         return response.data; // Backend returns string (OK) based on your schema
     }
 };
