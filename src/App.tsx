@@ -1,23 +1,29 @@
 import { useEffect } from "react";
 import { AppRouter } from "./app/router";
-// import "./App.css";
 import BackendDownOverlay from "./components/common/BackendDownOverlay";
-import { useAppStore } from "./store/authStore";
+import { useAuthStore } from "./store/authStore"; 
 import { checkBackendHealth } from "./services/backendHealth";
 
-
 function App() {
-  const isBackendDown = useAppStore((state) => state.isBackendDown);
+  // Grab the necessary state and actions
+  const isBackendDown = useAuthStore((state) => state.isBackendDown);
+  const isInitialLoading = useAuthStore((state) => state.isInitialLoading);
+  const validateToken = useAuthStore((state) => state.validateToken);
 
   useEffect(() => {
-    // Run immediately on app start
-    checkBackendHealth();
+    const init = async () => {
+      await validateToken(); 
+      await checkBackendHealth(); 
+    };
+    init();
 
-    // Then run every 10 seconds
     const interval = setInterval(checkBackendHealth, 60000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [validateToken]);
+
+  if (isInitialLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>

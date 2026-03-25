@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAppStore } from "../store/authStore";
+// import { useAuthStore } from "../store/authStore";
 
 const apiClient = axios.create({
     // 1. Fixed typo: localhost

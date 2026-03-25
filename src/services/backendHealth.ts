@@ -1,15 +1,17 @@
 import axios from "axios";
-import { useAppStore } from "../store/authStore";
+import { useAuthStore } from "../store/authStore";
 
 export const checkBackendHealth = async () => {
     try {
         const res = await axios.get("http://localhost:8080/actuator/health");
-
-        if (res.data.status === "UP") {
-            useAppStore.getState().setBackendDown(false);
-        }
+        
+        // If the request succeeds and status is UP, backend is NOT down
+        const isUp = res.data?.status === "UP";
+        useAuthStore.getState().setBackendDown(!isUp);
+        
     } catch (error) {
         console.error("Backend health check failed");
-        useAppStore.getState().setBackendDown(true);
+        // If the request fails (404, 500, or Network Error), backend IS down
+        useAuthStore.getState().setBackendDown(true);
     }
 };
