@@ -26,7 +26,12 @@ export default function LoginPage() {
             });
 
             // Store the response (token and type) in Zustand
-            setAuth(response);
+            const token = response.data?.token;
+
+            if (!token) {
+              throw new Error("Token missing from response");
+            }
+            setAuth(token);
 
             // Navigate to protected dashboard
             navigate('/dashboard');

@@ -1,0 +1,879 @@
+diff --git a/src/app/router.tsx b/src/app/router.tsx
+index a20ea39..1c5e3b4 100644
+--- a/src/app/router.tsx
++++ b/src/app/router.tsx
+@@ -5,12 +5,16 @@ import LoginPage from "../pages/auth/LoginPage";
+ import RegisterPage from "../pages/auth/RegisterPage";
+ 
+ export function AppRouter() {
+-    const { isAuthenticated } = useAuthStore();
++    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
++    const isInitialLoading = useAuthStore((state) => state.isInitialLoading);
++
++    if (isInitialLoading) {
++        return <div>Loading...</div>;
++    }
+ 
+     return (
+         <BrowserRouter>
+             <Routes>
+-                {/* Public Routes */}
+                 <Route
+                     path="/login"
+                     element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />}
+@@ -20,14 +24,12 @@ export function AppRouter() {
+                     element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
+                 />
+ 
+-                {/* Protected Routes */}
+-                <Route element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" />}>
++                <Route element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}>
+                     <Route path="/dashboard" element={<div>Dashboard Home</div>} />
+                     <Route path="/projects" element={<div>Projects List</div>} />
+                 </Route>
+ 
+-                {/* Redirect */}
+-                <Route path="/" element={<Navigate to="/dashboard" />} />
++                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+             </Routes>
+         </BrowserRouter>
+     );
+diff --git a/src/features/auth/authService.ts b/src/features/auth/authService.ts
+index d5965da..8ef4525 100644
+--- a/src/features/auth/authService.ts
++++ b/src/features/auth/authService.ts
+@@ -3,7 +3,7 @@ import type { components } from "../../types/api-schema";
+ 
+ // Extract types from the generated schema for easier use
+ export type LoginRequest = components["schemas"]["LoginRequest"];
+-export type AuthResponse = components["schemas"]["AuthResponse"];
++export type AuthResponse = components["schemas"]["ApiResponseAuthResponse"];
+ export type IndividualRegistrationRequest = components["schemas"]["IndividualRegistrationRequest"];
+ 
+ export const authService = {
+diff --git a/src/pages/auth/LoginPage.tsx b/src/pages/auth/LoginPage.tsx
+index 729ad4c..1602233 100644
+--- a/src/pages/auth/LoginPage.tsx
++++ b/src/pages/auth/LoginPage.tsx
+@@ -26,7 +26,12 @@ export default function LoginPage() {
+             });
+ 
+             // Store the response (token and type) in Zustand
+-            setAuth(response);
++            const token = response.data?.token;
++
++            if (!token) {
++              throw new Error("Token missing from response");
++            }
++            setAuth(token);
+ 
+             // Navigate to protected dashboard
+             navigate('/dashboard');
+diff --git a/src/store/authStore.ts b/src/store/authStore.ts
+index 2adcad7..0a3c1fb 100644
+--- a/src/store/authStore.ts
++++ b/src/store/authStore.ts
+@@ -13,8 +13,8 @@ interface AuthState {
+   isBackendDown: boolean; // Added this
+   user: User | null;
+   roles: string[];
+-  
+-  setAuth: (token: string, user: User, roles: string[]) => void;
++
++  setAuth: (token: string) => void;
+   setBackendDown: (isDown: boolean) => void; // Added this
+   validateToken: () => Promise<void>;
+   logout: () => void;
+@@ -30,31 +30,44 @@ export const useAuthStore = create<AuthState>((set) => ({
+ 
+   setBackendDown: (isDown) => set({ isBackendDown: isDown }),
+ 
+-  setAuth: (token, user, roles) => {
++  setAuth: (token) => {
+     localStorage.setItem("auth_token", token);
+-    set({ token, isAuthenticated: true, user, roles, isInitialLoading: false });
++    set({ token, isAuthenticated: true, isInitialLoading: false });
+   },
+ 
+   validateToken: async () => {
+     const token = localStorage.getItem("auth_token");
++
+     if (!token) {
+-      set({ isAuthenticated: false, isInitialLoading: true });
++      set({
++        token: null,
++        isAuthenticated: false,
++        isInitialLoading: false
++      });
+       return;
+     }
+ 
+-    // Using your existing service logic
+     const result = await validateTokenWithBackend();
+-    
++
+     if (result.isValid) {
+-      set({ 
+-        isAuthenticated: true, 
+-        user: result.user as any, // Cast as needed based on your API return
+-        roles: result.roles, 
+-        isInitialLoading: false 
++      set({
++        token,
++        isAuthenticated: true,
++        user: result.user as any,
++        roles: result.roles,
++        isInitialLoading: false
+       });
++      console.log(useAuthStore);
++      
+     } else {
+       localStorage.removeItem("auth_token");
+-      set({ token: null, isAuthenticated: false, isInitialLoading: false, user: null, roles: [] });
++      set({
++        token: null,
++        isAuthenticated: false,
++        isInitialLoading: false,
++        user: null,
++        roles: []
++      });
+     }
+   },
+ 
+diff --git a/src/types/api-schema.d.ts b/src/types/api-schema.d.ts
+index 119bb8b..d8c6467 100644
+--- a/src/types/api-schema.d.ts
++++ b/src/types/api-schema.d.ts
+@@ -4,6 +4,70 @@
+  */
+ 
+ export interface paths {
++    "/api/v1/milestones/{id}": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get?: never;
++        put: operations["updateMilestone"];
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/dev/reset-db": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get?: never;
++        put?: never;
++        post: operations["resetDatabase"];
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/api/v1/projects": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get?: never;
++        put?: never;
++        post: operations["createProject"];
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/api/v1/projects/{id}/milestones": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get: operations["getMilestones"];
++        put?: never;
++        post: operations["create"];
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
+     "/api/auth/register/individual": {
+         parameters: {
+             query?: never;
+@@ -36,10 +100,204 @@ export interface paths {
+         patch?: never;
+         trace?: never;
+     };
++    "/api/v1/projects/{id}/status": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get?: never;
++        put?: never;
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch: operations["updateStatus"];
++        trace?: never;
++    };
++    "/api/v1/admin/users/{id}/status": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get?: never;
++        put?: never;
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch: operations["updateUserStatus"];
++        trace?: never;
++    };
++    "/api/v1/projects/{id}": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get: operations["getProjectById"];
++        put?: never;
++        post?: never;
++        delete: operations["deleteProject"];
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/api/v1/projects/organization/{orgId}": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get: operations["getProjectsByOrg"];
++        put?: never;
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/api/v1/milestone/{id}": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get: operations["getMilestone"];
++        put?: never;
++        post?: never;
++        delete: operations["deleteMilestone"];
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/api/v1/admin/users": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get: operations["getAllUsers"];
++        put?: never;
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/api/v1/admin/users/{id}": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get: operations["getUserById"];
++        put?: never;
++        post?: never;
++        delete: operations["deleteUser"];
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/api/v1/admin/users/testCache": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get: operations["test"];
++        put?: never;
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
++    "/api/auth/validate": {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        get: operations["validateToken"];
++        put?: never;
++        post?: never;
++        delete?: never;
++        options?: never;
++        head?: never;
++        patch?: never;
++        trace?: never;
++    };
+ }
+ export type webhooks = Record<string, never>;
+ export interface components {
+     schemas: {
++        MilestoneUpdateRequest: {
++            title: string;
++            /** @enum {string} */
++            status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DELAYED";
++            /** Format: date-time */
++            dueDate: string;
++        };
++        MilestoneResponse: {
++            /** Format: int64 */
++            id?: number;
++            title?: string;
++            status?: string;
++            /** Format: date-time */
++            dueDate?: string;
++        };
++        ProjectRequestDTO: {
++            name: string;
++            description?: string;
++            /** Format: uuid */
++            organizationId: string;
++            /** Format: date */
++            startDate?: string;
++            /** Format: date */
++            deadline?: string;
++        };
++        ProjectResponseDTO: {
++            /** Format: uuid */
++            id?: string;
++            name?: string;
++            description?: string;
++            /** @enum {string} */
++            status?: "PLANNING" | "IN_PROGRESS" | "ON_HOLD" | "COMPLETED" | "CANCELLED";
++            /** Format: int32 */
++            progressPercentage?: number;
++            /** Format: date */
++            startDate?: string;
++            /** Format: date */
++            deadline?: string;
++            /** Format: uuid */
++            organizationId?: string;
++            /** Format: date-time */
++            createdAt?: string;
++            /** Format: date-time */
++            updatedAt?: string;
++        };
++        MilestoneCreateRequestDTO: {
++            title: string;
++            /** Format: date-time */
++            dueDate: string;
++        };
+         IndividualRegistrationRequest: {
+             firstName: string;
+             lastName: string;
+@@ -47,15 +305,53 @@ export interface components {
+             email: string;
+             password: string;
+         };
++        ApiResponseVoid: {
++            /** Format: date-time */
++            timestamp?: string;
++            /** Format: int32 */
++            status?: number;
++            error?: string;
++            message?: string;
++            path?: string;
++            data?: unknown;
++        };
+         LoginRequest: {
+             /** Format: email */
+             email: string;
+             password: string;
+         };
++        ApiResponseAuthResponse: {
++            /** Format: date-time */
++            timestamp?: string;
++            /** Format: int32 */
++            status?: number;
++            error?: string;
++            message?: string;
++            path?: string;
++            data?: components["schemas"]["AuthResponse"];
++        };
+         AuthResponse: {
+             token?: string;
+             type?: string;
+         };
++        UpdateUserStatusDTO: {
++            active?: boolean;
++        };
++        Role: {
++            /** Format: int64 */
++            id?: number;
++            /** @enum {string} */
++            name?: "ROLE_USER" | "ROLE_ADMIN" | "ROLE_MODERATOR" | "ROLE_STAFF";
++        };
++        UserResponseDTO: {
++            /** Format: uuid */
++            id?: string;
++            email?: string;
++            firstName?: string;
++            lastName?: string;
++            role?: components["schemas"]["Role"];
++            active?: boolean;
++        };
+     };
+     responses: never;
+     parameters: never;
+@@ -65,6 +361,124 @@ export interface components {
+ }
+ export type $defs = Record<string, never>;
+ export interface operations {
++    updateMilestone: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: number;
++            };
++            cookie?: never;
++        };
++        requestBody: {
++            content: {
++                "application/json": components["schemas"]["MilestoneUpdateRequest"];
++            };
++        };
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["MilestoneResponse"];
++                };
++            };
++        };
++    };
++    resetDatabase: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": string;
++                };
++            };
++        };
++    };
++    createProject: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        requestBody: {
++            content: {
++                "application/json": components["schemas"]["ProjectRequestDTO"];
++            };
++        };
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["ProjectResponseDTO"];
++                };
++            };
++        };
++    };
++    getMilestones: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["MilestoneResponse"][];
++                };
++            };
++        };
++    };
++    create: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: string;
++            };
++            cookie?: never;
++        };
++        requestBody: {
++            content: {
++                "application/json": components["schemas"]["MilestoneCreateRequestDTO"];
++            };
++        };
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["MilestoneResponse"];
++                };
++            };
++        };
++    };
+     registerIndividual: {
+         parameters: {
+             query?: never;
+@@ -84,7 +498,7 @@ export interface operations {
+                     [name: string]: unknown;
+                 };
+                 content: {
+-                    "*/*": string;
++                    "*/*": components["schemas"]["ApiResponseVoid"];
+                 };
+             };
+         };
+@@ -108,7 +522,267 @@ export interface operations {
+                     [name: string]: unknown;
+                 };
+                 content: {
+-                    "*/*": components["schemas"]["AuthResponse"];
++                    "*/*": components["schemas"]["ApiResponseAuthResponse"];
++                };
++            };
++        };
++    };
++    updateStatus: {
++        parameters: {
++            query: {
++                status: "PLANNING" | "IN_PROGRESS" | "ON_HOLD" | "COMPLETED" | "CANCELLED";
++            };
++            header?: never;
++            path: {
++                id: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["ProjectResponseDTO"];
++                };
++            };
++        };
++    };
++    updateUserStatus: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: string;
++            };
++            cookie?: never;
++        };
++        requestBody: {
++            content: {
++                "application/json": components["schemas"]["UpdateUserStatusDTO"];
++            };
++        };
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["UserResponseDTO"];
++                };
++            };
++        };
++    };
++    getProjectById: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["ProjectResponseDTO"];
++                };
++            };
++        };
++    };
++    deleteProject: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content?: never;
++            };
++        };
++    };
++    getProjectsByOrg: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                orgId: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["ProjectResponseDTO"][];
++                };
++            };
++        };
++    };
++    getMilestone: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: number;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["MilestoneResponse"];
++                };
++            };
++        };
++    };
++    deleteMilestone: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: number;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": Record<string, never>;
++                };
++            };
++        };
++    };
++    getAllUsers: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["UserResponseDTO"][];
++                };
++            };
++        };
++    };
++    getUserById: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": components["schemas"]["UserResponseDTO"];
++                };
++            };
++        };
++    };
++    deleteUser: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path: {
++                id: string;
++            };
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content?: never;
++            };
++        };
++    };
++    test: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": string;
++                };
++            };
++        };
++    };
++    validateToken: {
++        parameters: {
++            query?: never;
++            header?: never;
++            path?: never;
++            cookie?: never;
++        };
++        requestBody?: never;
++        responses: {
++            /** @description OK */
++            200: {
++                headers: {
++                    [name: string]: unknown;
++                };
++                content: {
++                    "*/*": Record<string, never>;
+                 };
+             };
+         };

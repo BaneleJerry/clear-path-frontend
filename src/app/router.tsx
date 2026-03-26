@@ -5,12 +5,16 @@ import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 
 export function AppRouter() {
-    const { isAuthenticated } = useAuthStore();
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const isInitialLoading = useAuthStore((state) => state.isInitialLoading);
+
+    if (isInitialLoading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <BrowserRouter>
             <Routes>
-                {/* Public Routes */}
                 <Route
                     path="/login"
                     element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />}
@@ -20,14 +24,12 @@ export function AppRouter() {
                     element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
                 />
 
-                {/* Protected Routes */}
-                <Route element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" />}>
+                <Route element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}>
                     <Route path="/dashboard" element={<div>Dashboard Home</div>} />
                     <Route path="/projects" element={<div>Projects List</div>} />
                 </Route>
 
-                {/* Redirect */}
-                <Route path="/" element={<Navigate to="/dashboard" />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </BrowserRouter>
     );

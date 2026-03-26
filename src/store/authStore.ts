@@ -13,8 +13,8 @@ interface AuthState {
   isBackendDown: boolean; // Added this
   user: User | null;
   roles: string[];
-  
-  setAuth: (token: string, user: User, roles: string[]) => void;
+
+  setAuth: (token: string) => void;
   setBackendDown: (isDown: boolean) => void; // Added this
   validateToken: () => Promise<void>;
   logout: () => void;
@@ -30,31 +30,44 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setBackendDown: (isDown) => set({ isBackendDown: isDown }),
 
-  setAuth: (token, user, roles) => {
+  setAuth: (token) => {
     localStorage.setItem("auth_token", token);
-    set({ token, isAuthenticated: true, user, roles, isInitialLoading: false });
+    set({ token, isAuthenticated: true, isInitialLoading: false });
   },
 
   validateToken: async () => {
     const token = localStorage.getItem("auth_token");
+
     if (!token) {
-      set({ isAuthenticated: false, isInitialLoading: true });
+      set({
+        token: null,
+        isAuthenticated: false,
+        isInitialLoading: false
+      });
       return;
     }
 
-    // Using your existing service logic
     const result = await validateTokenWithBackend();
-    
+
     if (result.isValid) {
-      set({ 
-        isAuthenticated: true, 
-        user: result.user as any, // Cast as needed based on your API return
-        roles: result.roles, 
-        isInitialLoading: false 
+      set({
+        token,
+        isAuthenticated: true,
+        user: result.user as any,
+        roles: result.roles,
+        isInitialLoading: false
       });
+      console.log(useAuthStore);
+      
     } else {
       localStorage.removeItem("auth_token");
-      set({ token: null, isAuthenticated: false, isInitialLoading: false, user: null, roles: [] });
+      set({
+        token: null,
+        isAuthenticated: false,
+        isInitialLoading: false,
+        user: null,
+        roles: []
+      });
     }
   },
 

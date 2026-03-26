@@ -3,7 +3,7 @@ import type { components } from "../../types/api-schema";
 
 // Extract types from the generated schema for easier use
 export type LoginRequest = components["schemas"]["LoginRequest"];
-export type AuthResponse = components["schemas"]["AuthResponse"];
+export type AuthResponse = components["schemas"]["ApiResponseAuthResponse"];
 export type IndividualRegistrationRequest = components["schemas"]["IndividualRegistrationRequest"];
 
 export const authService = {
