@@ -1,31 +1,29 @@
 import axios from "axios";
-// import { useAuthStore } from "../store/authStore";
+import { store } from "../store/store"; // adjust path to your store
 
 const apiClient = axios.create({
-    // 1. Fixed typo: localhost
     baseURL: "http://localhost:8080/api",
     headers: { "Content-Type": "application/json" },
-    // 2. Added a timeout (optional but recommended for fail-safes)
     timeout: 10000,
 });
 
-// Request Interceptor (Your existing logic)
+// Request Interceptor
 apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem("auth_token");
+    const token = store.getState().auth.token;
+
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
 });
 
-// Response Interceptor (The Fail-Safe)
+// Response Interceptor
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        
-        // Handle 401 Unauthorized (Expired Token)
         if (error.response?.status === 401) {
-            localStorage.removeItem("auth_token");
+            localStorage.removeItem("token");
             window.location.href = "/login";
         }
 

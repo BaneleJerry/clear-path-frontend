@@ -1,35 +1,33 @@
 import { useEffect } from "react";
 import { AppRouter } from "./app/router";
-import BackendDownOverlay from "./components/common/BackendDownOverlay";
-import { useAuthStore } from "./store/authStore"; 
+
 import { checkBackendHealth } from "./services/backendHealth";
+
+import { Provider } from "react-redux";
+import { store } from "./store/store";
 
 function App() {
   // Grab the necessary state and actions
-  const isBackendDown = useAuthStore((state) => state.isBackendDown);
-  const isInitialLoading = useAuthStore((state) => state.isInitialLoading);
-  const validateToken = useAuthStore((state) => state.validateToken);
+
 
   useEffect(() => {
     const init = async () => {
-      await validateToken(); 
-      await checkBackendHealth(); 
+      await checkBackendHealth();
     };
     init();
 
     const interval = setInterval(checkBackendHealth, 60000);
     return () => clearInterval(interval);
-  }, [validateToken]);
+  }, []);
 
-  if (isInitialLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
-    <div>
-      {isBackendDown && <BackendDownOverlay />}
-      <AppRouter />
-    </div>
+    <Provider store={store}>
+      <div>
+        <AppRouter />
+      </div>
+    </Provider>
+
   );
 }
 
