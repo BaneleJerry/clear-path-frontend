@@ -1,34 +1,39 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react"; // Added useRef
+import { useAppDispatch, useAppSelector } from "./store/store";
+import { checkAuth } from "./store/features/authThunk";
+import { setLoading } from "./store/features/authSlice";
 import { AppRouter } from "./app/router";
 
-import { checkBackendHealth } from "./services/backendHealth";
+export function App() {
+  const dispatch = useAppDispatch();
+  const { token, isLoading } = useAppSelector((state) => state.auth);
 
-import { Provider } from "react-redux";
-import { store } from "./store/store";
-
-function App() {
-  // Grab the necessary state and actions
-
+  
+  const initialized = useRef(false);
 
   useEffect(() => {
-    const init = async () => {
-      await checkBackendHealth();
-    };
-    init();
+    if (initialized.current) return;
 
-    const interval = setInterval(checkBackendHealth, 60000);
-    return () => clearInterval(interval);
-  }, []);
+    if (token) {
+      dispatch(checkAuth());
+    } else {
+      dispatch(setLoading(false));
+    }
 
+    initialized.current = true;
+  }, [dispatch, token]);
 
-  return (
-    <Provider store={store}>
-      <div>
-        <AppRouter />
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <div className="flex flex-col items-center gap-2">
+          {/* Simple CSS spinner or text */}
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-gray-500 font-medium">Verifying session...</p>
+        </div>
       </div>
-    </Provider>
+    );
+  }
 
-  );
+  return <AppRouter />;
 }
-
-export default App;

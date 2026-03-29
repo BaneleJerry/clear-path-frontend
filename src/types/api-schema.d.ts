@@ -352,6 +352,14 @@ export interface components {
             role?: components["schemas"]["Role"];
             active?: boolean;
         };
+        GrantedAuthority: {
+            authority?: string;
+        };
+        TokenValidateResponse: {
+            username?: string;
+            authorities?: components["schemas"]["GrantedAuthority"][];
+            authenticated?: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -782,7 +790,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": Record<string, never>;
+                    "*/*": components["schemas"]["TokenValidateResponse"];
                 };
             };
         };
