@@ -1,35 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authService } from '../../features/auth/authService';
 import { User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../../store/features/authThunk';
+import type { AppDispatch, RootState } from '../../store/store'; // Adjust paths as needed
 
 export default function RegisterPage() {
+    const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
+
+    
+    const { isLoading } = useSelector((state: RootState) => state.auth);
+
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
         password: '',
     });
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
         setError('');
 
         try {
-            // Calling the service we mapped to your api-schema.d.ts
-            await authService.registerIndividual(formData);
-
-            // On success, redirect to login with a success message (optional state)
+            await dispatch(registerUser(formData)).unwrap();
             navigate('/login', { state: { message: 'Account created! Please sign in.' } });
         } catch (err: any) {
-            const message = err.response?.data?.message || 'Registration failed. Please check your details.';
+            // This triggers the 'rejected' case in your authSlice
+            const message = err?.message || 'Registration failed. Please check your details.';
             setError(message);
-        } finally {
-            setIsLoading(false);
         }
     };
 

@@ -1,17 +1,41 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAppSelector } from "../store/store"; 
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { useAppSelector } from "../store/store";
 import DashboardLayout from "../layouts/DashboardLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 
+/**
+ * A wrapper for routes that require authentication.
+ * If not authenticated, it redirects to login.
+ */
+const ProtectedRoute = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+    return <Outlet />;
+};
+
+/**
+ * A wrapper for auth pages (Login/Register).
+ * If already authenticated, it redirects to dashboard.
+ */
+const PublicRoute = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
+    if (isAuthenticated) {
+        return <Navigate to="/dashboard" replace />;
+    }
+    return <Outlet />;
+};
+
 export function AppRouter() {
-    // Use the Redux selector instead of useAuthStore
     const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
 
+    // 1. Master Guard: If Redux is still figuring out the session, 
+    // we show nothing or a minimal spinner to prevent route jumping.
     if (isLoading) {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <p>Loading session...</p>
+            <div className="flex items-center justify-center h-screen bg-gray-50">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-3 text-gray-600 font-medium">Syncing session...</span>
             </div>
         );
     }
@@ -19,23 +43,22 @@ export function AppRouter() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Public Routes - Redirect to dashboard if already logged in */}
-                <Route
-                    path="/login"
-                    element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />}
-                />
-                <Route
-                    path="/register"
-                    element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
-                />
-
-                {/* Protected Routes - Redirect to login if not authenticated */}
-                <Route element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}>
-                    <Route path="/dashboard" element={<div>Dashboard Home</div>} />
-                    <Route path="/projects" element={<div>Projects List</div>} />
+                {/* --- PUBLIC ROUTES --- */}
+                <Route element={<PublicRoute isAuthenticated={isAuthenticated} />}>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
                 </Route>
 
-                {/* Fallback */}
+                {/* --- PROTECTED ROUTES --- */}
+                <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+                    <Route element={<DashboardLayout />}>
+                        <Route path="/dashboard" element={<div>Dashboard Home</div>} />
+                        <Route path="/projects" element={<div>Projects List</div>} />
+                        {/* Add more private routes here */}
+                    </Route>
+                </Route>
+
+                {/* --- REDIRECTS & FALLBACKS --- */}
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>

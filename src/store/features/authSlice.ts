@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { checkAuth } from "./authThunk";
-import type { components } from "../../types/api-schema";
+import { registerUser, userLogin, checkAuth } from "./authThunk"; // Import your new login thunk
+import { type TokenValidationResponse } from "../../features/auth/authService"; // Import the expected response type from your auth service
 
 type AuthState = {
     token: string | null;
@@ -10,13 +10,10 @@ type AuthState = {
     authorities: string[];
 };
 
-type ValidateResponse = components["schemas"]["TokenValidateResponse"]
-type AuthResponse = components["schemas"]["ApiResponseAuthResponse"];
-
-const initialState: AuthState = {
+export const initialState: AuthState = {
     token: localStorage.getItem("token"),
     isAuthenticated: false,
-    isLoading: true, 
+    isLoading: !!localStorage.getItem("token"), 
     username: null,
     authorities: [],
 };
@@ -25,20 +22,6 @@ const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        setToken: (state, action: PayloadAction<string>) => {
-            state.token = action.payload;
-            localStorage.setItem("token", action.payload);
-        },
-        setLogin: (state, action: PayloadAction<AuthResponse>) => {
-            const token = action.payload.data?.token;
-            if (token) {
-                state.token = token;
-                state.isAuthenticated = true;
-                state.isLoading = false;
-                localStorage.setItem("token", token);
-            }
-        }
-        ,
         logout: (state) => {
             state.token = null;
             state.isAuthenticated = false;
@@ -46,31 +29,69 @@ const authSlice = createSlice({
             state.authorities = [];
             localStorage.removeItem("token");
         },
-        setLoading: (state, action: PayloadAction<boolean>) => {
-            state.isLoading = action.payload;
+        setInitialized: (state) => {
+            state.isLoading = false;
+            // If a token exists, we treat them as authenticated for now
+            state.isAuthenticated = !!state.token;
         },
     },
     extraReducers: (builder) => {
         builder
+            // --- REGISTRATION ---
+            .addCase(registerUser.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(registerUser.fulfilled, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(registerUser.rejected, (state) => {
+                state.isLoading = false;
+            })
+
+            // --- LOGIN ---
+            .addCase(userLogin.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(userLogin.fulfilled, (state, action: PayloadAction<any>) => {
+                state.isLoading = false;
+                state.isAuthenticated = true;
+                state.token = action.payload.token;
+                state.username = action.payload.username;
+                state.authorities = action.payload.authorities || [];
+            })
+            .addCase(userLogin.rejected, (state) => {
+                state.isLoading = false;
+                state.isAuthenticated = false;
+                state.token = null;
+            });
+
+        // --- CHECK AUTH ---
+        builder
             .addCase(checkAuth.pending, (state) => {
                 state.isLoading = true;
             })
-            .addCase(checkAuth.fulfilled, (state, action: PayloadAction<ValidateResponse>) => {
+            .addCase(checkAuth.fulfilled, (state, action: PayloadAction<TokenValidationResponse>) => {
                 state.isLoading = false;
-                state.isAuthenticated = !!action.payload.authenticated;
+                state.isAuthenticated = true;
                 state.username = action.payload.username ?? null;
                 state.authorities = action.payload.authorities
-                    ?.map(a => a.authority)
-                    .filter((a): a is string => !!a) ?? [];
+                    ? action.payload.authorities
+                        .map(a => a.authority)           
+                        .filter((a): a is string => !!a) 
+                    : [];
             })
             .addCase(checkAuth.rejected, (state) => {
                 state.isLoading = false;
                 state.isAuthenticated = false;
-                state.token = null; // Clear token if invalid
+                state.token = null;
+                state.username = null;
+                state.authorities = [];
                 localStorage.removeItem("token");
             });
-    },
+
+
+    }
 });
 
-export const { setToken, logout, setLoading, setLogin } = authSlice.actions;
+export const { logout, setInitialized } = authSlice.actions;
 export default authSlice.reducer;
