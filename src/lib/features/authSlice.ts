@@ -1,6 +1,9 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { registerUser, userLogin, checkAuth } from "./authThunk"; // Import your new login thunk
 import { type TokenValidationResponse } from "../../features/auth/authService"; // Import the expected response type from your auth service
+import type { AuthResponse } from "../../features/auth/authService";
+
+
 
 type AuthState = {
     token: string | null;
@@ -31,9 +34,12 @@ const authSlice = createSlice({
         },
         setInitialized: (state) => {
             state.isLoading = false;
-            // If a token exists, we treat them as authenticated for now
             state.isAuthenticated = !!state.token;
         },
+        setLogin:(state, action: PayloadAction<{ token: string}>) => {
+            state.token = action.payload.token;
+            state.isAuthenticated = true;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -52,12 +58,10 @@ const authSlice = createSlice({
             .addCase(userLogin.pending, (state) => {
                 state.isLoading = true;
             })
-            .addCase(userLogin.fulfilled, (state, action: PayloadAction<any>) => {
+            .addCase(userLogin.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
                 state.isLoading = false;
                 state.isAuthenticated = true;
-                state.token = action.payload.token;
-                state.username = action.payload.username;
-                state.authorities = action.payload.authorities || [];
+                state.token = action.payload?.token ?? null;
             })
             .addCase(userLogin.rejected, (state) => {
                 state.isLoading = false;

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "./store/store";
-import { setInitialized,  } from "./store/features/authSlice"; // You'll need this simple action
+import { useAppDispatch, useAppSelector } from "./lib/store";
+import { setInitialized, } from "./lib/features/authSlice"; // You'll need this simple action
 import { AppRouter } from "./app/router";
-import { checkAuth } from "./store/features/authThunk";
+import { checkAuth } from "./lib/features/authThunk";
 
 export function App() {
   const dispatch = useAppDispatch();

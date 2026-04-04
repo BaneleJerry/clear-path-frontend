@@ -19,13 +19,18 @@ export const userLogin = createAsyncThunk(
     async (credentials: { email: string; password: string }, { rejectWithValue }) => {
         try {
             const response = await authService.login(credentials);
-            const token = response.data?.token;
+            const data = response;
+
+            const token = data?.token;
             if (token) {
-                localStorage.setItem("token", token);
+                localStorage.setItem("token", token); 
             }
-            return response.data;
+
+            return data; 
         } catch (error: any) {
-            const message = error.response?.data?.message || "Login failed. Please check your credentials.";
+            const message =
+                error.response?.data?.message ||
+                "Login failed. Please check your credentials.";
             return rejectWithValue(message);
         }
     }

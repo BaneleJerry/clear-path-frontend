@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from "../../store/store";
-import { userLogin } from '../../store/features/authThunk'; // Use the Thunk instead of service
+import { useAppDispatch, useAppSelector } from "../../../lib/store";
+import { userLogin } from '../../../lib/features/authThunk'; // Use the Thunk instead of service
 // import { checkAuth } from '../../store/features/authThunk';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 

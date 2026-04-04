@@ -320,16 +320,6 @@ export interface components {
             email: string;
             password: string;
         };
-        ApiResponseAuthResponse: {
-            /** Format: date-time */
-            timestamp?: string;
-            /** Format: int32 */
-            status?: number;
-            error?: string;
-            message?: string;
-            path?: string;
-            data?: components["schemas"]["AuthResponse"];
-        };
         AuthResponse: {
             token?: string;
             type?: string;
@@ -530,7 +520,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ApiResponseAuthResponse"];
+                    "*/*": components["schemas"]["AuthResponse"];
                 };
             };
         };

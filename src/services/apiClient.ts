@@ -1,5 +1,5 @@
 import axios from "axios";
-import { store } from "../store/store"; // adjust path to your store
+import { store } from "../lib/store"; // adjust path to your store
 
 const apiClient = axios.create({
     baseURL: "http://localhost:8080/api",

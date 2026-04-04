@@ -1,10 +1,10 @@
 import apiClient from "../../services/apiClient";
-import type { components } from "../../types/api-schema";
+import type { components } from "../../app/types/api-schema";
 
 
 // Extract types from the generated schema for easier use
 export type LoginRequest = components["schemas"]["LoginRequest"];
-export type AuthResponse = components["schemas"]["ApiResponseAuthResponse"];
+export type AuthResponse = components["schemas"]["AuthResponse"];
 export type IndividualRegistrationRequest = components["schemas"]["IndividualRegistrationRequest"];
 export type TokenValidationResponse = components["schemas"]["TokenValidateResponse"];
 

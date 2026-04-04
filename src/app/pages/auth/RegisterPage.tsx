@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../../store/features/authThunk';
-import type { AppDispatch, RootState } from '../../store/store'; // Adjust paths as needed
+import { registerUser } from '../../../lib/features/authThunk';
+import type { AppDispatch, RootState } from '../../../lib/store'; // Adjust paths as needed
 
 export default function RegisterPage() {
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
 
-    
+
     const { isLoading } = useSelector((state: RootState) => state.auth);
 
     const [error, setError] = useState('');
