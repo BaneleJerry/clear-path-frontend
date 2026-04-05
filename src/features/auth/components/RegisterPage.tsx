@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../../../lib/features/authThunk';
+import { registerUser } from '../authThunk';
 import type { AppDispatch, RootState } from '../../../lib/store'; // Adjust paths as needed
 
 export default function RegisterPage() {

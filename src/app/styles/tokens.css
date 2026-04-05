@@ -1,19 +1,18 @@
 :root {
-  --color-primary: 37 99 235;
-  --color-bg: 248 250 252;
-  --color-surface: 255 255 255;
-
-  --color-text-primary: 15 23 42;
-  --color-text-secondary: 71 85 105;
-
-  --color-border: 226 232 240;
-
-  --color-success: 34 197 94;
-  --color-error: 239 68 68;
+  --token-primary:        170 59 255;
+  --token-bg:             248 250 252;
+  --token-surface:        255 255 255;
+  --token-text-primary:   15 23 42;
+  --token-text-secondary: 71 85 105;
+  --token-border:         226 232 240;
+  --token-success:        34 197 94;
+  --token-error:          239 68 68;
 }
 
 .dark {
-  --color-bg: 15 23 42;
-  --color-surface: 30 41 59;
-  --color-text-primary: 248 250 252;
+  --token-primary:        192 132 252;
+  --token-bg:             15 23 42;
+  --token-surface:        30 41 59;
+  --token-text-primary:   248 250 252;
+  --token-text-secondary: 156 163 175;
 }

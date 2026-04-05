@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAppSelector } from "../lib/store";
 import DashboardLayout from "./layouts/DashboardLayout";
-import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
+import LoginPage from "../features/auth/components/LoginPage";
+import RegisterPage from "../features/auth/components/RegisterPage";
 
 /**
  * A wrapper for routes that require authentication.
