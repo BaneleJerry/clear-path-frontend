@@ -1,18 +1,21 @@
 :root {
-  --token-primary:        170 59 255;
-  --token-bg:             248 250 252;
-  --token-surface:        255 255 255;
-  --token-text-primary:   15 23 42;
+  --token-primary: 170 59 255;
+  --token-bg: 248 250 252;
+  --token-surface: 255 255 255;
+  --token-text-primary: 15 23 42;
   --token-text-secondary: 71 85 105;
-  --token-border:         226 232 240;
-  --token-success:        34 197 94;
-  --token-error:          239 68 68;
+  --token-border: 226 232 240;
+  --token-success: 34 197 94;
+  --token-error: 239 68 68;
+
+  --font-display: "DM Serif Display", serif;
+  --font-body: "DM Sans", sans-serif;
 }
 
 .dark {
-  --token-primary:        192 132 252;
-  --token-bg:             15 23 42;
-  --token-surface:        30 41 59;
-  --token-text-primary:   248 250 252;
+  --token-primary: 192 132 252;
+  --token-bg: 15 23 42;
+  --token-surface: 30 41 59;
+  --token-text-primary: 248 250 252;
   --token-text-secondary: 156 163 175;
 }

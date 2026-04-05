@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../../lib/store';
 import { registerUser } from '../authThunk';
-import type { AppDispatch, RootState } from '../../../lib/store'; // Adjust paths as needed
+import { User, Mail, Lock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function RegisterPage() {
-    const navigate = useNavigate();
-    const dispatch = useDispatch<AppDispatch>();
-
-
-    const { isLoading } = useSelector((state: RootState) => state.auth);
-
-    const [error, setError] = useState('');
+    const [localError, setLocalError] = useState('');
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -20,17 +13,20 @@ export default function RegisterPage() {
         password: '',
     });
 
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+
+    const { isLoading } = useAppSelector((state) => state.auth);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
+        setLocalError('');
 
         try {
             await dispatch(registerUser(formData)).unwrap();
-            navigate('/login', { state: { message: 'Account created! Please sign in.' } });
+            navigate('/login', { replace: true });
         } catch (err: any) {
-            // This triggers the 'rejected' case in your authSlice
-            const message = err?.message || 'Registration failed. Please check your details.';
-            setError(message);
+            setLocalError(err || 'Registration failed. Please check your details.');
         }
     };
 
@@ -39,95 +35,271 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-sm border border-gray-100">
-                <div className="text-center">
-                    <h2 className="text-3xl font-extrabold text-blue-600">Create Account</h2>
-                    <p className="mt-2 text-sm text-gray-600">Start tracking your milestones with Clear-Path</p>
+        <div
+            style={{
+                width: '100vw',
+                minHeight: '100svh',
+                marginLeft: 'calc(50% - 50vw)',
+                marginRight: 'calc(50% - 50vw)',
+                display: 'flex',
+                textAlign: 'left',
+                fontFamily: "'DM Sans', sans-serif",
+                boxSizing: 'border-box',
+                overflow: 'hidden',
+            }}
+        >
+            {/* ── Left panel (same as login) ── */}
+            <div
+                style={{
+                    width: '38%',
+                    maxWidth: '520px',
+                    flexShrink: 0,
+                    background: '#1C1917',
+                    padding: '56px 48px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    position: 'relative',
+                }}
+            >
+                <p style={{
+                    fontFamily: "'DM Serif Display', serif",
+                    fontSize: '22px',
+                    color: '#FAFAF9',
+                    margin: 0,
+                }}>
+                    Clear<span style={{ color: '#D97706' }}>-</span>Path
+                </p>
+
+                <div>
+                    <p style={{
+                        fontFamily: "'DM Serif Display', serif",
+                        fontSize: '32px',
+                        color: '#FAFAF9',
+                        marginBottom: '16px',
+                    }}>
+                        Start your{' '}
+                        <em style={{ color: '#D97706', fontStyle: 'italic' }}>journey</em>{' '}
+                        with clarity.
+                    </p>
+
+                    <p style={{
+                        fontSize: '14px',
+                        color: '#A8A29E',
+                        lineHeight: 1.6,
+                    }}>
+                        Build better habits, track progress, and take control of your future.
+                    </p>
                 </div>
 
-                <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-                    {error && (
-                        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg text-center border border-red-100">
-                            {error}
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="relative">
-                            <User className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
-                            <input
-                                name="firstName"
-                                type="text"
-                                required
-                                className="appearance-none rounded-lg relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all"
-                                placeholder="First Name"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="relative">
-                            <User className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
-                            <input
-                                name="lastName"
-                                type="text"
-                                required
-                                className="appearance-none rounded-lg relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all"
-                                placeholder="Last Name"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="relative">
-                        <Mail className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
-                        <input
-                            name="email"
-                            type="email"
-                            required
-                            className="appearance-none rounded-lg relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all"
-                            placeholder="Email address"
-                            value={formData.email}
-                            onChange={handleChange}
+                <div style={{ display: 'flex', gap: '6px' }}>
+                    {[false, true, false].map((active, i) => (
+                        <span
+                            key={i}
+                            style={{
+                                width: '7px',
+                                height: '7px',
+                                borderRadius: '50%',
+                                background: active ? '#D97706' : '#44403C',
+                            }}
                         />
-                    </div>
+                    ))}
+                </div>
+            </div>
 
-                    <div className="relative">
-                        <Lock className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
-                        <input
-                            name="password"
-                            type="password"
-                            required
-                            className="appearance-none rounded-lg relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all"
-                            placeholder="Password"
-                            value={formData.password}
-                            onChange={handleChange}
-                        />
-                    </div>
+            {/* ── Right panel ── */}
+            <div style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgb(var(--token-surface))',
+                padding: '48px 32px',
+            }}>
+                <div style={{ width: '100%', maxWidth: '440px' }}>
 
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors shadow-md"
-                    >
-                        {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : (
-                            <>
-                                Create Account <ArrowRight className="ml-2 h-4 w-4" />
-                            </>
-                        )}
-                    </button>
-
-                    <div className="text-center mt-4">
-                        <p className="text-sm text-gray-600">
-                            Already have an account?{' '}
-                            <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">
-                                Sign in here
-                            </Link>
+                    {/* Heading */}
+                    <div style={{ marginBottom: '32px' }}>
+                        <h2 style={{
+                            fontFamily: "'DM Serif Display', serif",
+                            fontSize: '32px',
+                            color: 'rgb(var(--token-text-primary))',
+                            marginBottom: '8px',
+                            fontWeight: 400,
+                        }}>
+                            Create account
+                        </h2>
+                        <p style={{
+                            fontSize: '14px',
+                            color: 'rgb(var(--token-text-secondary))',
+                        }}>
+                            Get started with Clear-Path
                         </p>
                     </div>
-                </form>
+
+                    <form onSubmit={handleSubmit} style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '20px'
+                    }}>
+
+                        {localError && (
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '13px',
+                                padding: '10px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(var(--token-error), 0.2)',
+                                background: 'rgba(var(--token-error), 0.08)',
+                                color: 'rgb(var(--token-error))',
+                            }}>
+                                <AlertCircle size={15} />
+                                <span>{localError}</span>
+                            </div>
+                        )}
+
+                        {/* Name fields */}
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <div style={{ flex: 1, position: 'relative' }}>
+                                <User size={15} style={{
+                                    position: 'absolute',
+                                    left: '13px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: 'rgb(var(--token-text-secondary))',
+                                }} />
+                                <input
+                                    name="firstName"
+                                    placeholder="First name"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    required
+                                    style={inputStyle}
+                                />
+                            </div>
+
+                            <div style={{ flex: 1, position: 'relative' }}>
+                                <User size={15} style={{
+                                    position: 'absolute',
+                                    left: '13px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: 'rgb(var(--token-text-secondary))',
+                                }} />
+                                <input
+                                    name="lastName"
+                                    placeholder="Last name"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    required
+                                    style={inputStyle}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Email */}
+                        <div style={{ position: 'relative' }}>
+                            <Mail size={15} style={iconStyle} />
+                            <input
+                                name="email"
+                                type="email"
+                                placeholder="you@example.com"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                                style={inputStyle}
+                            />
+                        </div>
+
+                        {/* Password */}
+                        <div style={{ position: 'relative' }}>
+                            <Lock size={15} style={iconStyle} />
+                            <input
+                                name="password"
+                                type="password"
+                                placeholder="••••••••"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                style={inputStyle}
+                            />
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            style={{
+                                width: '100%',
+                                height: '46px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: '#1C1917',
+                                color: '#FAFAF9',
+                                cursor: isLoading ? 'not-allowed' : 'pointer',
+                                opacity: isLoading ? 0.6 : 1,
+                            }}
+                        >
+                            {isLoading
+                                ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                                : <><span>Create account</span><ArrowRight size={15} /></>
+                            }
+                        </button>
+                    </form>
+
+                    {/* Footer */}
+                    <p style={{
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        marginTop: '24px',
+                        color: 'rgb(var(--token-text-secondary))'
+                    }}>
+                        Already have an account?{' '}
+                        <button
+                            onClick={() => navigate('/login')}
+                            style={{
+                                color: '#D97706',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontWeight: 500,
+                            }}
+                        >
+                            Sign in
+                        </button>
+                    </p>
+                </div>
             </div>
+
+            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 }
+
+/* Reusable styles */
+const inputStyle: React.CSSProperties = {
+    width: '100%',
+    height: '44px',
+    paddingLeft: '40px',
+    paddingRight: '14px',
+    borderRadius: '8px',
+    border: '1px solid rgb(var(--token-border))',
+    background: 'rgb(var(--token-bg))',
+    color: 'rgb(var(--token-text-primary))',
+    fontSize: '14px',
+    outline: 'none',
+};
+
+const iconStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: '13px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: 'rgb(var(--token-text-secondary))',
+};
