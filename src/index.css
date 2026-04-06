@@ -1,16 +1,15 @@
 @import "./app/styles/tokens.css";
 @import "tailwindcss";
-@source "../src";
 
-@theme {
-  --color-primary:    rgb(var(--token-primary) / <alpha-value>);
-  --color-bg:         rgb(var(--token-bg) / <alpha-value>);
-  --color-surface:    rgb(var(--token-surface) / <alpha-value>);
-  --color-text:       rgb(var(--token-text-primary) / <alpha-value>);
-  --color-muted:      rgb(var(--token-text-secondary) / <alpha-value>);
-  --color-border:     rgb(var(--token-border) / <alpha-value>);
-  --color-success:    rgb(var(--token-success) / <alpha-value>);
-  --color-error:      rgb(var(--token-error) / <alpha-value>);
+@theme inline {
+  --color-primary:        rgb(var(--token-primary) / <alpha-value>);
+  --color-bg:             rgb(var(--token-bg) / <alpha-value>);
+  --color-surface:        rgb(var(--token-surface) / <alpha-value>);
+  --color-border:         rgb(var(--token-border) / <alpha-value>);
+  --color-success:        rgb(var(--token-success) / <alpha-value>);
+  --color-error:          rgb(var(--token-error) / <alpha-value>);
+  --color-text-primary:   rgb(var(--token-text-primary) / <alpha-value>);
+  --color-text-secondary: rgb(var(--token-text-secondary) / <alpha-value>);
 }
 
 @layer base {
@@ -66,14 +65,12 @@
 
 @layer base {
   #root {
-    width: 1126px;
+    width: 100%;
     max-width: 100%;
-    margin: 0 auto;
-    text-align: center;
-    border-inline: 1px solid rgb(var(--token-border));
+    margin: 0;
+    text-align: left;
     min-height: 100svh;
-    display: flex;
-    flex-direction: column;
+    display: block;
     box-sizing: border-box;
   }
 
