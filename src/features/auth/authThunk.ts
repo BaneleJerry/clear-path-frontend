@@ -1,15 +1,15 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { authService, type IndividualRegistrationRequest } from "../../features/auth/authService";
+import { authService, type RegisterRequest } from "../../features/auth/authService";
 
 
 
 export const registerUser = createAsyncThunk(
     "auth/registerUser",
-    async (userData: IndividualRegistrationRequest, { rejectWithValue }) => {
+    async (userData: RegisterRequest, { rejectWithValue }) => {
         try {
-            await authService.registerIndividual(userData);
+            await authService.registerUser(userData);
         } catch (error: any) {
-            const message = error.response?.data?.message || "Registration failed. Please check your details.";
+            const message = error.response?.data?.message || "Registration failed.";
             return rejectWithValue(message);
         }
     }

@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/organizations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findById"];
+        put: operations["update"];
+        post?: never;
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/dev/reset-db": {
         parameters: {
             query?: never;
@@ -68,7 +84,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/auth/register/individual": {
+    "/api/organizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findAll"];
+        put?: never;
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizations/assign-user": {
         parameters: {
             query?: never;
             header?: never;
@@ -77,7 +109,55 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["registerIndividual"];
+        post: operations["assignUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findAll_1"];
+        put?: never;
+        post: operations["sendInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invites/redeem/code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["redeemByCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["register"];
         delete?: never;
         options?: never;
         head?: never;
@@ -228,6 +308,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/organizations/{id}/pending-invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["pendingInvites"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizations/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invites/redeem": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["redeemByToken"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/validate": {
         parameters: {
             query?: never;
@@ -239,6 +367,38 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizations/{orgId}/users/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["removeUser"];
         options?: never;
         head?: never;
         patch?: never;
@@ -262,6 +422,22 @@ export interface components {
             status?: string;
             /** Format: date-time */
             dueDate?: string;
+        };
+        OrganizationRequest: {
+            name: string;
+            /** @enum {string} */
+            type: "INDIVIDUAL" | "COMPANY";
+        };
+        OrganizationResponse: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            /** @enum {string} */
+            type?: "INDIVIDUAL" | "COMPANY";
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
         };
         ProjectRequestDTO: {
             name: string;
@@ -298,12 +474,42 @@ export interface components {
             /** Format: date-time */
             dueDate: string;
         };
-        IndividualRegistrationRequest: {
+        AssignUserRequest: {
+            /** Format: uuid */
+            organizationId: string;
+            /** Format: uuid */
+            userId: string;
+        };
+        InviteRequest: {
+            /** Format: email */
+            email: string;
+            /** @enum {string} */
+            assignedRole: "ROLE_USER" | "ROLE_ADMIN" | "ROLE_MODERATOR" | "ROLE_STAFF";
+            /** Format: uuid */
+            organisationId?: string;
+        };
+        RedeemByCodeRequest: {
+            email: string;
+            code: string;
+        };
+        InviteResponse: {
+            token?: string;
+            code?: string;
+            inviteeEmail?: string;
+            /** @enum {string} */
+            assignedRole?: "ROLE_USER" | "ROLE_ADMIN" | "ROLE_MODERATOR" | "ROLE_STAFF";
+            used?: boolean;
+            /** Format: date-time */
+            expiresAt?: string;
+        };
+        RegisterRequest: {
             firstName: string;
             lastName: string;
             /** Format: email */
             email: string;
             password: string;
+            inviteToken?: string;
+            inviteCode?: string;
         };
         ApiResponseVoid: {
             /** Format: date-time */
@@ -342,6 +548,34 @@ export interface components {
             role?: components["schemas"]["Role"];
             active?: boolean;
         };
+        Organization: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            /** @enum {string} */
+            type?: "INDIVIDUAL" | "COMPANY";
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        User: {
+            /** Format: uuid */
+            id?: string;
+            organization?: components["schemas"]["Organization"];
+            email?: string;
+            password?: string;
+            role?: components["schemas"]["Role"];
+            firstName?: string;
+            lastName?: string;
+            /** Format: date-time */
+            lastLoginAt?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+            active?: boolean;
+        };
         GrantedAuthority: {
             authority?: string;
         };
@@ -349,6 +583,16 @@ export interface components {
             username?: string;
             authorities?: components["schemas"]["GrantedAuthority"][];
             authenticated?: boolean;
+        };
+        DashboardStats: {
+            /** Format: int64 */
+            totalUsers?: number;
+            /** Format: int64 */
+            totalOrganisations?: number;
+            /** Format: int64 */
+            pendingInvites?: number;
+            /** Format: int64 */
+            activeToday?: number;
         };
     };
     responses: never;
@@ -382,6 +626,74 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["MilestoneResponse"];
                 };
+            };
+        };
+    };
+    findById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrganizationResponse"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrganizationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrganizationResponse"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -477,7 +789,27 @@ export interface operations {
             };
         };
     };
-    registerIndividual: {
+    findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrganizationResponse"][];
+                };
+            };
+        };
+    };
+    create_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -486,7 +818,121 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["IndividualRegistrationRequest"];
+                "application/json": components["schemas"]["OrganizationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrganizationResponse"];
+                };
+            };
+        };
+    };
+    assignUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignUserRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    findAll_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InviteResponse"][];
+                };
+            };
+        };
+    };
+    sendInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    redeemByCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedeemByCodeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InviteResponse"];
+                };
+            };
+        };
+    };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
             };
         };
         responses: {
@@ -720,7 +1166,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["UserResponseDTO"];
+                    "*/*": components["schemas"]["User"];
                 };
             };
         };
@@ -765,6 +1211,73 @@ export interface operations {
             };
         };
     };
+    pendingInvites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": number;
+                };
+            };
+        };
+    };
+    search: {
+        parameters: {
+            query?: {
+                name?: string;
+                type?: "INDIVIDUAL" | "COMPANY";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrganizationResponse"][];
+                };
+            };
+        };
+    };
+    redeemByToken: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InviteResponse"];
+                };
+            };
+        };
+    };
     validateToken: {
         parameters: {
             query?: never;
@@ -782,6 +1295,47 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["TokenValidateResponse"];
                 };
+            };
+        };
+    };
+    getStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DashboardStats"];
+                };
+            };
+        };
+    };
+    removeUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -5,24 +5,36 @@ import type { components } from "../../app/types/api-schema";
 // Extract types from the generated schema for easier use
 export type LoginRequest = components["schemas"]["LoginRequest"];
 export type AuthResponse = components["schemas"]["AuthResponse"];
-export type IndividualRegistrationRequest = components["schemas"]["IndividualRegistrationRequest"];
+export type RegisterRequest = components["schemas"]["RegisterRequest"];
 export type TokenValidationResponse = components["schemas"]["TokenValidateResponse"];
+
+export type InviteResponse = components["schemas"]["InviteResponse"];
+export type RedeemByCodeRequest = components["schemas"]["RedeemByCodeRequest"];
 
 export const authService = {
     login: async (credentials: LoginRequest): Promise<AuthResponse> => {
-        // Note: Use the path exactly as defined in your generated 'paths'
         const response = await apiClient.post("/auth/login", credentials);
         return response.data;
     },
 
-    registerIndividual: async (data: IndividualRegistrationRequest): Promise<string> => {
-        const response = await apiClient.post("/auth/register/individual", data);
-        return response.data;  
+    registerUser: async (data: RegisterRequest): Promise<void> => {
+        await apiClient.post("/auth/register", data);
     },
 
     validateToken: async (): Promise<TokenValidationResponse> => {
         const response = await apiClient.get<TokenValidationResponse>("/auth/validate");
         return response.data;
-    }
+    },
 };
 
+export const inviteService = {
+    redeemByToken: async (token: string): Promise<InviteResponse> => {
+        const response = await apiClient.get(`/invites/validate?token=${token}`);
+        return response.data;
+    },
+
+    redeemByCode: async (data: RedeemByCodeRequest): Promise<InviteResponse> => {
+        const response = await apiClient.post("/invites/validate/code", data);
+        return response.data;
+    },
+};
