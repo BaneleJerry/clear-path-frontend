@@ -2,7 +2,6 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { authService, type RegisterRequest } from "../../features/auth/authService";
 
 
-
 export const registerUser = createAsyncThunk(
     "auth/registerUser",
     async (userData: RegisterRequest, { rejectWithValue }) => {
@@ -16,7 +15,7 @@ export const registerUser = createAsyncThunk(
 );
 export const userLogin = createAsyncThunk(
     "auth/userLogin",
-    async (credentials: { email: string; password: string }, { rejectWithValue }) => {
+    async (credentials: { email: string; password: string }, {  rejectWithValue }) => {
         try {
             const response = await authService.login(credentials);
             const data = response;
@@ -25,6 +24,7 @@ export const userLogin = createAsyncThunk(
             if (token) {
                 localStorage.setItem("token", token); 
             }
+
 
             return data; 
         } catch (error: any) {

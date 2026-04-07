@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../lib/store';
-import { userLogin } from '../authThunk';
+import { checkAuth, userLogin } from '../authThunk';
 import { Mail, Lock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
@@ -18,7 +18,9 @@ export default function LoginPage() {
     e.preventDefault();
     setLocalError('');
     try {
-      await dispatch(userLogin({ email, password })).unwrap();
+       await dispatch(userLogin({ email, password })).unwrap();
+       await dispatch(checkAuth()).unwrap();
+
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
       setLocalError(err || 'Invalid email or password.');
