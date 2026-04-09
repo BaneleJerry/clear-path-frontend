@@ -28,6 +28,9 @@ export const userLogin = createAsyncThunk(
 
             return data; 
         } catch (error: any) {
+            console.log('❌ login error:', error);
+            console.log('❌ error.response:', error.response);
+            console.log('❌ message:', error.response?.data?.message);
             const message =
                 error.response?.data?.message ||
                 "Login failed. Please check your credentials.";
