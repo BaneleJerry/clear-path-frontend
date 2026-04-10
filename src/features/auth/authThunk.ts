@@ -24,13 +24,8 @@ export const userLogin = createAsyncThunk(
             if (token) {
                 localStorage.setItem("token", token); 
             }
-
-
             return data; 
         } catch (error: any) {
-            console.log('❌ login error:', error);
-            console.log('❌ error.response:', error.response);
-            console.log('❌ message:', error.response?.data?.message);
             const message =
                 error.response?.data?.message ||
                 "Login failed. Please check your credentials.";
@@ -45,8 +40,6 @@ export const checkAuth = createAsyncThunk(
         try {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("No token found");
-
-            // The apiClient interceptor will automatically attach the token
             const data = await authService.validateToken();
             return data;
         } catch (error: any) {
