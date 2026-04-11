@@ -59,7 +59,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["getAllProjects"];
         put?: never;
         post: operations["createProject"];
         delete?: never;
@@ -132,7 +132,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/invites/redeem/code": {
+    "/api/invites/validate/code": {
         parameters: {
             query?: never;
             header?: never;
@@ -141,7 +141,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["redeemByCode"];
+        post: operations["validateByCode"];
         delete?: never;
         options?: never;
         head?: never;
@@ -340,14 +340,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/invites/redeem": {
+    "/api/invites/validate": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["redeemByToken"];
+        get: operations["validateByToken"];
         put?: never;
         post?: never;
         delete?: never;
@@ -419,7 +419,8 @@ export interface components {
             /** Format: int64 */
             id?: number;
             title?: string;
-            status?: string;
+            /** @enum {string} */
+            status?: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DELAYED";
             /** Format: date-time */
             dueDate?: string;
         };
@@ -468,6 +469,7 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+            organizationName?: string;
         };
         MilestoneCreateRequestDTO: {
             title: string;
@@ -717,6 +719,26 @@ export interface operations {
             };
         };
     };
+    getAllProjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProjectResponseDTO"][];
+                };
+            };
+        };
+    };
     createProject: {
         parameters: {
             query?: never;
@@ -899,7 +921,7 @@ export interface operations {
             };
         };
     };
-    redeemByCode: {
+    validateByCode: {
         parameters: {
             query?: never;
             header?: never;
@@ -1256,7 +1278,7 @@ export interface operations {
             };
         };
     };
-    redeemByToken: {
+    validateByToken: {
         parameters: {
             query: {
                 token: string;
