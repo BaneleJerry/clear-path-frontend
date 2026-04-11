@@ -6,12 +6,16 @@ import type { TypedUseSelectorHook } from "react-redux";
 import authReducer from "../features/auth/authSlice";
 import dashboardReducer from "../features/dashboard/dashboardSlice";
 import inviteReducer from "../features/invite/inviteSlice";
+import userReducer from "../features/user/userSlice";
+import orgReducer from "../features/organization/orgSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     dashboard: dashboardReducer,
     invites: inviteReducer,
+    users: userReducer,
+    organizations: orgReducer,
   },
   devTools: true,
 });
