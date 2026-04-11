@@ -12,7 +12,7 @@ import { logout } from "../../features/auth/authSlice";
 
 const ADMIN_NAV = [
     { to: "/dashboard",          label: "Dashboard",      icon: LayoutDashboard },
-    { to: "/dashboard/invites",  label: "Invites",        icon: Mail },          // ← fix path
+    { to: "/dashboard/invites",  label: "Invites",        icon: Mail },          
     { to: "/dashboard/users",    label: "Users",          icon: Users },
     { to: "/dashboard/organisations", label: "Organisations", icon: Building2 },
     { to: "/dashboard/projects", label: "Projects",       icon: FolderKanban },

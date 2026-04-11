@@ -5,6 +5,8 @@ import AdminDashboard from "../features/dashboard/components/AdminDashboard";
 import InvitesPage from "../features/invite/components/InvitePage";
 import LoginPage from "../features/auth/components/LoginPage";
 import RegisterPage from "../features/auth/components/RegisterPage";
+import UsersPage from "../features/user/components/UserPage";
+import OrgPage from "../features/organization/components/OrgPage";
 
 const ProtectedRoute = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
     if (!isAuthenticated) return <Navigate to="/login" replace />;
@@ -41,8 +43,10 @@ export function AppRouter() {
                 <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
                     <Route element={<DashboardLayout />}>
                         <Route path="/dashboard" element={<AdminDashboard />} />
-                        <Route path="/dashboard/invites" element={<InvitesPage />} />   {/* ← add */}
+                        <Route path="/dashboard/invites" element={<InvitesPage />} />
+                        <Route path="/dashboard/users" element={<UsersPage />} />
                         <Route path="/projects" element={<div>Projects</div>} />
+                        <Route path="/dashboard/organisations" element={<OrgPage />} />
                     </Route>
                 </Route>
 
