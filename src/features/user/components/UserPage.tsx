@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
     AlertCircle, CheckCircle, Search,
-    Trash2, ToggleLeft, ToggleRight, Shield
+    Trash2, ToggleLeft, ToggleRight,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../../lib/store";
 import { fetchUsers, deleteUser, updateUserStatus } from "../userThunk";
