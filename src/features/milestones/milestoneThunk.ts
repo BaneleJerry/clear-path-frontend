@@ -13,7 +13,7 @@ interface CreateMilestonePayload {
 }
 
 interface UpdateMilestonePayload {
-    milestoneId: string;
+    milestoneId: number;
     data: MilestoneUpdateRequest;
 }
 
@@ -41,7 +41,7 @@ export const fetchMilestones = createAsyncThunk<MilestoneRecord[], string>(
     }
 );
 
-export const fetchMilestone = createAsyncThunk<MilestoneRecord, string>(
+export const fetchMilestone = createAsyncThunk<MilestoneRecord, number>(
     "milestones/fetchOne",
     async (milestoneId, { rejectWithValue }) => {
         try {
@@ -63,7 +63,7 @@ export const updateMilestone = createAsyncThunk<MilestoneRecord, UpdateMilestone
     }
 );
 
-export const deleteMilestone = createAsyncThunk<string, string>(
+export const deleteMilestone = createAsyncThunk<number, number>(
     "milestones/delete",
     async (milestoneId, { rejectWithValue }) => {
         try {

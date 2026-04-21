@@ -17,17 +17,17 @@ const milestoneService = {
         return res.data;
     },
 
-    getMilestone: async (milestoneId: string): Promise<MilestoneRecord> => {
+    getMilestone: async (milestoneId: number): Promise<MilestoneRecord> => {
         const res = await apiClient.get(`v1/milestones/${milestoneId}`);
         return res.data;
     },
 
-    update: async (milestoneId: string, data: MilestoneUpdateRequest): Promise<MilestoneRecord> => {
+    update: async (milestoneId: number, data: MilestoneUpdateRequest): Promise<MilestoneRecord> => {
         const res = await apiClient.put(`v1/milestones/${milestoneId}`, data);
         return res.data;
     },
 
-    delete: async (milestoneId: string): Promise<void> => {
+    delete: async (milestoneId: number): Promise<void> => {
         await apiClient.delete(`v1/milestones/${milestoneId}`);
     }
 }
