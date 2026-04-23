@@ -9,6 +9,7 @@ import inviteReducer from "../features/invite/inviteSlice";
 import userReducer from "../features/user/userSlice";
 import orgReducer from "../features/organization/orgSlice";
 import projectReducer from "../features/projects/projectSlice";
+import milestoneReducer from "../features/milestones/milestoneSlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     users: userReducer,
     organizations: orgReducer,
     projects: projectReducer,
+    milestones: milestoneReducer,
   },
   devTools: true,
 });
