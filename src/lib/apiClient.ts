@@ -1,7 +1,6 @@
 import axios from "axios";
 import { store } from "./store"; 
 
-import type { paths } from "../app/types/api-schema";
 
 
 const apiClient = axios.create({

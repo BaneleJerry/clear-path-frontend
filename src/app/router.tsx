@@ -8,6 +8,7 @@ import RegisterPage from "../features/auth/components/RegisterPage";
 import UsersPage from "../features/user/components/UserPage";
 import OrgPage from "../features/organization/components/OrgPage";
 import ProjectPage from "../features/projects/Components/ProjectPage";
+import ProjectDetailPage from "../features/milestones/Componets/milestonePage";
 
 const ProtectedRoute = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
     if (!isAuthenticated) return <Navigate to="/login" replace />;
@@ -47,6 +48,7 @@ export function AppRouter() {
                         <Route path="/dashboard/invites" element={<InvitesPage />} />
                         <Route path="/dashboard/users" element={<UsersPage />} />
                         <Route path="/dashboard/projects" element={<ProjectPage />} />
+                        <Route path="/dashboard/projects/:id" element={<ProjectDetailPage />} />
                         <Route path="/dashboard/organisations" element={<OrgPage />} />
                     </Route>
                 </Route>
