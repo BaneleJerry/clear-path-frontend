@@ -14,6 +14,7 @@ export type RedeemByCodeRequest = components["schemas"]["RedeemByCodeRequest"];
 export const authService = {
     login: async (credentials: LoginRequest): Promise<AuthResponse> => {
         const response = await apiClient.post("/auth/login", credentials);
+        console.log(response);
         return response.data;
     },
 

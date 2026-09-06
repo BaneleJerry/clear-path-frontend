@@ -29,6 +29,7 @@ export const userLogin = createAsyncThunk(
             const message =
                 error.response?.data?.message ||
                 "Login failed. Please check your credentials.";
+            console.log(error)
             return rejectWithValue(message);
         }
     }

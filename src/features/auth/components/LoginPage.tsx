@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [localError, setLocalError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -17,13 +18,16 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError('');
+    setSubmitting(true);
     try {
        await dispatch(userLogin({ email, password })).unwrap();
        await dispatch(checkAuth()).unwrap();
-// add bannert"
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
+        console.log(err)
       setLocalError(err || 'Invalid email or password.');
+    }finally {
+      setSubmitting(false);
     }
   };
 
@@ -308,8 +312,8 @@ export default function LoginPage() {
               onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.background = '#292524'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = '#1C1917'; }}
             >
-              {isLoading
-                ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+              {
+                submitting ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
                 : <><span>Sign in</span><ArrowRight size={15} /></>
               }
             </button>
