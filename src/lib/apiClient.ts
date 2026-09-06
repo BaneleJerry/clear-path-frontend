@@ -9,7 +9,6 @@ const IS_PRODUCTION = import.meta.env.PROD;
 if (IS_PRODUCTION && !BASE_URL.startsWith("https://")) {
     throw new Error(`VITE_API_BASE_URL must use HTTPS in production, got: ${BASE_URL}`);
 }
-}
 
 const apiClient = axios.create({
     baseURL: BASE_URL,
