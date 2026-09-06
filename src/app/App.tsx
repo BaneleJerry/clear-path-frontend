@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../lib/store";
+import { useAppDispatch} from "../lib/store";
 import { setInitialized, } from "../features/auth/authSlice"; 
 import { AppRouter } from "./router";
 import { checkAuth } from "../features/auth/authThunk";
